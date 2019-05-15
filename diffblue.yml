@@ -1,0 +1,330 @@
+buildCmd: mvn -e -X -Dmaven.test.skip=true compile
+testCmd: true
+lineLength: 4096
+skipVerification: true
+cbmcArguments:
+  # Do not generate coverage comments on generated tests.
+  java-generate-no-comments: true
+phases:
+  -
+  #Phase 0 PRETTY AND SIMPLE - Simple models, quick cover, pretty Tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # Instrument the file as opposed to the function only
+      cover-only: file
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 1 PRETTY AND COMPLEX - Standard models, longer run time, pretty tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 2
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+  -
+  #Phase 2 Simple and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # If the logs contain output of the following then proceed to phase X
+    nextPhase:
+      # If the function is not analysable then do not pass onto the next phase
+      not_analyzed: null
+  -
+  #Phase 3 Complex and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 3000
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 3
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 4 EXCEPTIONS
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: true
+      # Set an upper bound on loop unwinding.
+  -
+    #PHASE 5 Big numbers and less contraints on inputs 
+    timeout: 300
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 100
+      # Bound the length of input strings.
+      max-nondet-string-length: 100
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 6
+units:
+# Target TGF: 16.0
+#  >methods=3
+#  >complexity=16
+#  >construction=1.0
+#  >dependency=1.0
+ - target:
+   - dir: target/classes
+     file: hr/com/vgv/verano/http/parts/RequestUri$Of.class
+     sourceDir: src/main/java
+     sourceFile: hr/com/vgv/verano/http/parts/RequestUri.java
+   - dir: target/classes
+     file: hr/com/vgv/verano/http/parts/QueryParams$Of.class
+     sourceDir: src/main/java
+     sourceFile: hr/com/vgv/verano/http/parts/QueryParams.java
+   - dir: target/classes
+     file: hr/com/vgv/verano/http/Dict.class
+     sourceDir: src/main/java
+     sourceFile: hr/com/vgv/verano/http/Dict.java
+   - dir: target/classes
+     file: hr/com/vgv/verano/http/parts/Path$Of.class
+     sourceDir: src/main/java
+     sourceFile: hr/com/vgv/verano/http/parts/Path.java
+# Target TGF: 24.0
+#  >methods=5
+#  >complexity=48
+#  >construction=4.0
+#  >dependency=2.0
+ - target:
+   - dir: target/classes
+     file: hr/com/vgv/verano/http/Dict$Envelope.class
+     sourceDir: src/main/java
+     sourceFile: hr/com/vgv/verano/http/Dict.java
+   - dir: target/classes
+     file: hr/com/vgv/verano/http/Dict.class
+     sourceDir: src/main/java
+     sourceFile: hr/com/vgv/verano/http/Dict.java
+# Target TGF: 13.0
+#  >methods=5
+#  >complexity=39
+#  >construction=1.0
+#  >dependency=0.333333333333
+ - target:
+   - dir: target/classes
+     file: hr/com/vgv/verano/http/parts/Headers$Of.class
+     sourceDir: src/main/java
+     sourceFile: hr/com/vgv/verano/http/parts/Headers.java
+   - dir: target/classes
+     file: hr/com/vgv/verano/http/KvpOf.class
+     sourceDir: src/main/java
+     sourceFile: hr/com/vgv/verano/http/KvpOf.java
+   - dir: target/classes
+     file: hr/com/vgv/verano/http/Kvp.class
+     sourceDir: src/main/java
+     sourceFile: hr/com/vgv/verano/http/Kvp.java
+# Target TGF: 31.0
+#  >methods=3
+#  >complexity=31
+#  >construction=2.0
+#  >dependency=2.0
+ - target:
+   - dir: target/classes
+     file: hr/com/vgv/verano/http/parts/Body$Of.class
+     sourceDir: src/main/java
+     sourceFile: hr/com/vgv/verano/http/parts/Body.java
+   - dir: target/classes
+     file: hr/com/vgv/verano/http/parts/FormParams$Of.class
+     sourceDir: src/main/java
+     sourceFile: hr/com/vgv/verano/http/parts/FormParams.java
+   - dir: target/classes
+     file: hr/com/vgv/verano/http/Dict.class
+     sourceDir: src/main/java
+     sourceFile: hr/com/vgv/verano/http/Dict.java
+# Target TGF: 23.0
+#  >methods=2
+#  >complexity=23
+#  >construction=1.0
+#  >dependency=1.0
+ - target:
+   - dir: target/classes
+     file: hr/com/vgv/verano/http/parts/QueryParam$Of.class
+     sourceDir: src/main/java
+     sourceFile: hr/com/vgv/verano/http/parts/QueryParam.java
+   - dir: target/classes
+     file: hr/com/vgv/verano/http/parts/QueryParam.class
+     sourceDir: src/main/java
+     sourceFile: hr/com/vgv/verano/http/parts/QueryParam.java
+   - dir: target/classes
+     file: hr/com/vgv/verano/http/Dict.class
+     sourceDir: src/main/java
+     sourceFile: hr/com/vgv/verano/http/Dict.java
+# Target TGF: 23.0
+#  >methods=2
+#  >complexity=23
+#  >construction=1.0
+#  >dependency=1.0
+ - target:
+   - dir: target/classes
+     file: hr/com/vgv/verano/http/parts/FormParam$Of.class
+     sourceDir: src/main/java
+     sourceFile: hr/com/vgv/verano/http/parts/FormParam.java
+   - dir: target/classes
+     file: hr/com/vgv/verano/http/parts/FormParam.class
+     sourceDir: src/main/java
+     sourceFile: hr/com/vgv/verano/http/parts/FormParam.java
+   - dir: target/classes
+     file: hr/com/vgv/verano/http/Dict.class
+     sourceDir: src/main/java
+     sourceFile: hr/com/vgv/verano/http/Dict.java
+# Target TGF: 39.0
+#  >methods=11
+#  >complexity=55
+#  >construction=3.0
+#  >dependency=2.33333333333
+ - target:
+   - dir: target/classes
+     file: hr/com/vgv/verano/http/HashDict.class
+     sourceDir: src/main/java
+     sourceFile: hr/com/vgv/verano/http/HashDict.java
+   - dir: target/classes
+     file: hr/com/vgv/verano/http/Kvp.class
+     sourceDir: src/main/java
+     sourceFile: hr/com/vgv/verano/http/Kvp.java
+   - dir: target/classes
+     file: hr/com/vgv/verano/http/Dict.class
+     sourceDir: src/main/java
+     sourceFile: hr/com/vgv/verano/http/Dict.java
+# Target TGF: 12.25
+#  >methods=4
+#  >complexity=98
+#  >construction=0.75
+#  >dependency=1.5
+ - target:
+   - dir: target/classes
+     file: hr/com/vgv/verano/http/parts/body/JsonBody$Of.class
+     sourceDir: src/main/java
+     sourceFile: hr/com/vgv/verano/http/parts/body/JsonBody.java
+   - dir: target/classes
+     file: hr/com/vgv/verano/http/parts/Body$Of.class
+     sourceDir: src/main/java
+     sourceFile: hr/com/vgv/verano/http/parts/Body.java
+# Target TGF: 37.0
+#  >methods=2
+#  >complexity=74
+#  >construction=1.0
+#  >dependency=0.5
+ - target:
+   - dir: target/classes
+     file: hr/com/vgv/verano/http/parts/headers/Cookie$Of.class
+     sourceDir: src/main/java
+     sourceFile: hr/com/vgv/verano/http/parts/headers/Cookie.java
+   - dir: target/classes
+     file: hr/com/vgv/verano/http/parts/Headers$Of.class
+     sourceDir: src/main/java
+     sourceFile: hr/com/vgv/verano/http/parts/Headers.java
+# Target TGF: 23.0
+#  >methods=2
+#  >complexity=23
+#  >construction=1.0
+#  >dependency=1.0
+ - target:
+   - dir: target/classes
+     file: hr/com/vgv/verano/http/parts/Header$Of.class
+     sourceDir: src/main/java
+     sourceFile: hr/com/vgv/verano/http/parts/Header.java
+   - dir: target/classes
+     file: hr/com/vgv/verano/http/parts/Header.class
+     sourceDir: src/main/java
+     sourceFile: hr/com/vgv/verano/http/parts/Header.java
+   - dir: target/classes
+     file: hr/com/vgv/verano/http/Dict.class
+     sourceDir: src/main/java
+     sourceFile: hr/com/vgv/verano/http/Dict.java
